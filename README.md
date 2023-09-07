@@ -64,7 +64,7 @@ npm i @babel/core @babel/cli @babel/node -D
 
 ```json
 // nodemon.json
-// "ignore"은 저장할 때마다 서버가 호출되는 것을 막기 위함
+// "ignore"은 저장할 때마다 변경사항이 있을 시, 서버가 재시작되는 것을 막기 위함
 {
   "ignore": ["src/public/*"],
   "exec": "babel-node src/server.js"
@@ -120,6 +120,9 @@ app.set('view engine', 'pug')
 app.set('views', __dirname + '/views')
 app.use('/public', express.static(__dirname + '/public'))
 app.get('/', (req, res) => res.render('home'))
+
+// home만 사용할 것이기 때문에 redirect를 설정해줬다.
+app.get('/*', (req, res) => res.render('home'))
 
 const handleListen = () => console.log(`Listening on http://localhost:3000/`)
 app.listen(3000, handleListen)
