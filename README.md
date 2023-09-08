@@ -1,12 +1,19 @@
 # [video-chat (Demo)]()
 
-:point_up_2: 제목을 클릭하면 배포된 사이트를 확인하실 수 있습니다.
+👆🏻 제목을 클릭하면 배포된 사이트를 확인하실 수 있습니다.
 
 <br />
 
-## :pencil2: 학습 목적
+## ✏️ 학습 목적
 
-- Node.js, WebRTC, Websockets로 실시간 화상 채팅 구현하기
+- Node.js, WebRTC, Websockets로 실시간 화상 채팅 or 채팅방 구현하기
+
+## ✅ 구현 목록
+
+- [ ] 닉네임을 추가해서 채팅 구현
+- [ ] 입장, 퇴장 이벤트 추가
+- [ ] 채팅방에 접속중인 인원 확인
+- [ ] 서버에 실시간으로 몇 개의 방이 존재하는지 확인
 
 <br />
 
@@ -17,11 +24,47 @@
 
 <br />
 
-## :book: 학습 내용
+## 📖 학습 내용
 
-### 🔆 Socket이란?
+### 🔆 WebSocket이란?
 
--
+- 실시간 chat, notification 등과 같은 real-time을 만들 수 있다.<br/>
+<img width="100%" src="https://github.com/hyerimhan/video-chat/assets/64674174/6a5dc5e9-f9c9-48d8-8651-ded932c1101e"/>
+<table border>
+  <thead>
+    <th></th>
+    <th><center>HTTP</center></th>
+    <th><center>WebSocket</center></th>
+  </thead>
+  <tbody>
+    <tr>
+      <th><center>공통점</center></th>
+      <td colspan="2" align="center">protocol</td>
+    </tr>
+    <tr>
+      <th><center>차이점</center></th>
+      <td align="left">
+        - 유저가 request를 보내면 서버가 반응(response)한다.<br/>
+        - stateless<br/>
+        - 서버가 유저를 기억하지 못한다.<br/>
+        - 유저와 서버 사이에 아무런 연결이 없다.<br/>
+        - 서버는 오직 request를 받을때만 한번의 response를 주고 다음 request를 기다린다.
+      </td>
+      <td align="left">
+        - 도메인 주소에 "https"나 "http"대신 "ws"를 사용한다.<br/>
+        - 서버가 유저를 기억한다.<br/>
+        - 브라우저와 서버가 서로 커뮤니케이션 한다. (브라우저와 서버가 연결되어 있다.)<br/>
+        - 브라우저가 서버로 websocket request를 보내면, 서버가 받거나 거절한다.<br/>
+        - 한번 연결이 성립되면, 두 방향(양방향) 연결이 된다.
+      </td>
+    </tr>
+    <tr align="center">
+      <th><center>예</center></th>
+      <td>일반 웹</td>
+      <td>실시간 채팅</td>
+    </tr>
+  </tbody>
+</table>
 
 ### 🔆 프로젝트 생성
 
