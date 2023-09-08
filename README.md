@@ -8,6 +8,8 @@
 
 - Node.js, WebRTC, Websockets로 실시간 화상 채팅 or 채팅방 구현하기
 
+<br/>
+
 ## ✅ 구현 목록
 
 - [ ] 닉네임을 추가해서 채팅 구현
@@ -44,9 +46,10 @@
     <tr>
       <th><center>차이점</center></th>
       <td align="left">
+        - 도메인 주소에 "https"나 "http"를 사용한다.<br/>
+        - 서버가 유저를 기억하지 못한다.<br/>
         - 유저가 request를 보내면 서버가 반응(response)한다.<br/>
         - stateless<br/>
-        - 서버가 유저를 기억하지 못한다.<br/>
         - 유저와 서버 사이에 아무런 연결이 없다.<br/>
         - 서버는 오직 request를 받을때만 한번의 response를 주고 다음 request를 기다린다.
       </td>
