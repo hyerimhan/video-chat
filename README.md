@@ -143,16 +143,16 @@ npm i express pug
 import express from 'express'
 
 const app = express()
-app.listen(3000)
 ```
 
   </div>
 </details>
+
 <details>
   <summary>Frontend Setup</summary>
   <div markdown="1">
 
-#### 1. "src"폴더 안에 "public"폴더를 생성한 후, "js"폴더 안에 유저에게 보일 app.js파일을 생성한다.
+#### 1. "src"폴더 안에 "public"폴더를 생성한 후, "js"폴더 안에 유저에게 보일 `app.js`파일을 생성한다.
 
 #### 2. "src"폴더 안에 "views" 폴더를 생성한 후, html 역할을 해줄 `home.pug`파일을 생성한다.
 
@@ -171,7 +171,6 @@ app.get('/', (req, res) => res.render('home'))
 app.get('/*', (req, res) => res.render('home'))
 
 const handleListen = () => console.log(`Listening on http://localhost:3000/`)
-app.listen(3000, handleListen)
 ```
 
 ```pug
@@ -196,3 +195,26 @@ html(lang="ko")
 </details>
 
 <br />
+
+### 🔆 node.js로 서버 생성
+
+#### 1. ws(webSocket) 설치
+
+```
+npm i ws
+```
+
+#### 2. `server.js`에 webSocket 서버 생성할 코드를 추가한다.
+
+```JavaScript
+import http from 'http'
+import WebSocket from 'ws'
+
+// http 서버 생성
+const server = http.createServer(app)
+// webSocket 서버 생성
+// http 서버와 ws 2개의 protocol 사용 가능. http 서버 위에 ws서버를 만들기 위함. http, ws가 같은 port에 있길 원할때 사용 (선택)
+// 이렇게 하는 이유는 위에 설정해 둔 views, static files, home, redirection을 원하기 때문
+const wss = new WebSocket.Server({ server })
+server.listen(3000, handleListen)
+```
