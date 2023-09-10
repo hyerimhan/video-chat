@@ -22,10 +22,15 @@ const server = http.createServer(app)
 const wss = new WebSocket.Server({ server })
 server.listen(3000, handleListen)
 
+// fake database
+const sockets = []
+
 // server.js의 socket은 연결된 어떤 사람 (연결된 브라우저와의 contact(연락)라인)
 wss.on('connection', (socket) => {
+  sockets.push(socket)
   console.log('Connected to Browser ✅')
   socket.on('close', () => console.log('Disconnected from the Browser ❌'))
-  socket.on('message', (message) => console.log(message))
-  socket.send('hello')
+  socket.on('message', (message) =>
+    sockets.forEach((aSocket) => aSocket.send(message.toString()))
+  )
 })
