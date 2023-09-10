@@ -21,3 +21,10 @@ const server = http.createServer(app)
 // 이렇게 하는 이유는 위에 설정해 둔 views, static files, home, redirection을 원하기 때문
 const wss = new WebSocket.Server({ server })
 server.listen(3000, handleListen)
+
+// server.js의 socket은 연결된 어떤 사람 (연결된 브라우저와의 contact(연락)라인)
+const handleConnection = (socket) => {
+  console.log(socket)
+}
+
+wss.on('connection', handleConnection)
