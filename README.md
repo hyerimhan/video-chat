@@ -217,14 +217,6 @@ const server = http.createServer(app)
 // 이렇게 하는 이유는 위에 설정해 둔 views, static files, home, redirection을 원하기 때문
 const wss = new WebSocket.Server({ server })
 server.listen(3000, handleListen)
-
-// server.js의 socket은 연결된 어떤 사람 (연결된 브라우저와의 contact(연락)라인)
-wss.on('connection', (socket) => {
-  console.log('Connected to Browser ✅')
-  socket.on('close', () => console.log('Disconnected from the Browser ❌'))
-  socket.on('message', (message) => console.log(message))
-  socket.send('hello')
-})
 ```
 
 #### 3. `app.js`에 서버로 연결하는 코드를 작성한다.
@@ -235,9 +227,23 @@ wss.on('connection', (socket) => {
 let socket = new WebSocket(`ws://${window.location.host}`)
 ```
 
-#### 4. `app.js`에 Event 코드를 작성한다.
+### 🔆 Chat with WebSockets
+
+#### 1. 서버와 브라우저를 연결한다.
 
 ```JavaScript
+// server.js
+// server.js의 socket은 연결된 어떤 사람 (연결된 브라우저와의 contact(연락)라인)
+wss.on('connection', (socket) => {
+  console.log('Connected to Browser ✅')
+  socket.on('close', () => console.log('Disconnected from the Browser ❌'))
+  socket.on('message', (message) => console.log(message))
+  socket.send('hello')
+})
+```
+
+```JavaScript
+// app.js
 // 서버가 열렸을 때
 socket.addEventListener('open', () => {
   console.log('Connected to Server ✅')
@@ -253,6 +259,7 @@ socket.addEventListener('close', () => {
   console.log('Disconnected from Server ❌')
 })
 
+// 서버로 10초 후에 메세지를 보낸다.
 setTimeout(() => {
   socket.send('Hello from the browser')
 }, 10000)
