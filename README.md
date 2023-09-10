@@ -194,8 +194,6 @@ html(lang="ko")
   </div>
 </details>
 
-<br />
-
 ### 🔆 node.js로 서버 생성
 
 #### 1. ws(webSocket) 설치
@@ -237,8 +235,7 @@ let socket = new WebSocket(`ws://${window.location.host}`)
 wss.on('connection', (socket) => {
   console.log('Connected to Browser ✅')
   socket.on('close', () => console.log('Disconnected from the Browser ❌'))
-  socket.on('message', (message) => console.log(message))
-  socket.send('hello')
+  socket.on('message', (message) => socket.send(message.toString()))
 })
 ```
 
@@ -264,3 +261,22 @@ setTimeout(() => {
   socket.send('Hello from the browser')
 }, 10000)
 ```
+
+#### 2. 다른 브라우저 환경에서도 작동할 수 있는 코드를 작성한다.
+
+```JavaScript
+// server.js
+
+// fake database
+const sockets = []
+
+wss.on('connection', (socket) => {
+  sockets.push(socket)
+  // ...
+  socket.on('message', (message) =>
+    sockets.forEach((aSocket) => aSocket.send(message.toString()))
+  )
+})
+```
+
+<br />
