@@ -17,6 +17,7 @@ socket.addEventListener('close', () => {
   console.log('Disconnected from Server ❌')
 })
 
+// 서버로 10초 후에 메세지를 보낸다.
 setTimeout(() => {
   socket.send('Hello from the browser')
 }, 10000)
