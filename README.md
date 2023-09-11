@@ -12,7 +12,7 @@
 
 ## ✅ 구현 목록
 
-- [ ] 닉네임을 추가해서 채팅 구현
+- [x] 닉네임을 추가해서 채팅 구현
 - [ ] 입장, 퇴장 이벤트 추가
 - [ ] 채팅방에 접속중인 인원 확인
 - [ ] 서버에 실시간으로 몇 개의 방이 존재하는지 확인
@@ -231,6 +231,7 @@ let socket = new WebSocket(`ws://${window.location.host}`)
 
 ```JavaScript
 // server.js
+
 // server.js의 socket은 연결된 어떤 사람 (연결된 브라우저와의 contact(연락)라인)
 wss.on('connection', (socket) => {
   console.log('Connected to Browser ✅')
@@ -241,6 +242,7 @@ wss.on('connection', (socket) => {
 
 ```JavaScript
 // app.js
+
 // 서버가 열렸을 때
 socket.addEventListener('open', () => {
   console.log('Connected to Server ✅')
