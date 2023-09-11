@@ -9,8 +9,11 @@ html(lang="ko")
     header 
       h1 Video chat
     main 
+      form#nick
+        input(type="text", placeholder="choose a nickname", required)
+        button Save
       ul
-      form
+      form#message
         input(type="text", placeholder="Write a message", required)
         button Send
     script(src="/public/js/app.js") 
