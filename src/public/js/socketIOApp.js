@@ -8,6 +8,13 @@ room.hidden = true
 
 let roomName
 
+function addMessage(message) {
+  const ul = room.querySelector('ul')
+  const li = document.createElement('li')
+  li.innerText = message
+  ul.appendChild(li)
+}
+
 function showRoom() {
   welcome.hidden = true
   room.hidden = false
@@ -27,3 +34,6 @@ function handleRoomSubmit(event) {
 }
 
 form.addEventListener('submit', handleRoomSubmit)
+
+// 방에 다른 유저들이 입장하면 전체 메세지로 알려줌
+socket.on('welcome', () => addMessage('Someone joined!'))

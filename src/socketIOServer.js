@@ -21,9 +21,11 @@ wsServer.on('connection', (socket) => {
   // 모든 event를 감시
   socket.onAny((event) => console.log(`Socket Event: ${event}`))
   socket.on('enter_room', (roomName, done) => {
-    socket.join(roomName)
+    socket.join(roomName.payload)
     // app.js emit 세번째 argument인 서버에서 호출하는 function
     done()
+    // 방에 다른 유저들이 입장하는지 확인
+    socket.to(roomName.payload).emit('welcome')
   })
 })
 
