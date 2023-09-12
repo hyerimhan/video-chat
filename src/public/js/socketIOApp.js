@@ -17,11 +17,17 @@ function addMessage(message) {
 
 function handleMessageSubmit(event) {
   event.preventDefault()
-  const input = room.querySelector('input')
+  const input = room.querySelector('#message input')
   socket.emit('new_message', input.value, roomName, () => {
     addMessage(`You: ${input.value}`)
     input.value = ''
   })
+}
+
+function handleNicknameSubmit(event) {
+  event.preventDefault()
+  const input = room.querySelector('#name input')
+  socket.emit('nickname', input.value)
 }
 
 function showRoom() {
@@ -29,8 +35,10 @@ function showRoom() {
   room.hidden = false
   const h3 = room.querySelector('h3')
   h3.innerText = `Room ${roomName}`
-  const form = room.querySelector('form')
-  form.addEventListener('submit', handleMessageSubmit)
+  const messageForm = room.querySelector('#message')
+  const nameForm = room.querySelector('#name')
+  messageForm.addEventListener('submit', handleMessageSubmit)
+  nameForm.addEventListener('submit', handleNicknameSubmit)
 }
 
 function handleRoomSubmit(event) {
@@ -47,7 +55,7 @@ function handleRoomSubmit(event) {
 form.addEventListener('submit', handleRoomSubmit)
 
 // 방에 다른 유저들이 입장 or 퇴장하면 전체 메세지로 알려줌
-socket.on('welcome', () => addMessage('Someone joined!'))
-socket.on('bye', () => addMessage('Someone left ㅠㅠ'))
+socket.on('welcome', (user) => addMessage(`${user} arrived!`))
+socket.on('bye', (user) => addMessage(`${user} left ㅠㅠ`))
 
 socket.on('new_message', addMessage)

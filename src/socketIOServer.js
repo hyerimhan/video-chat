@@ -18,6 +18,7 @@ const httpServer = http.createServer(app)
 const wsServer = SocketIO(httpServer)
 
 wsServer.on('connection', (socket) => {
+  socket['nickname'] = 'Anon'
   // 모든 event를 감시
   socket.onAny((event) => console.log(`Socket Event: ${event}`))
   socket.on('enter_room', (roomName, done) => {
@@ -25,19 +26,22 @@ wsServer.on('connection', (socket) => {
     // app.js emit 마지막 argument인 서버에서 호출하는 function (FE에서 코드 실행)
     done()
     // 방에 다른 유저들이 입장하는지 확인
-    socket.to(roomName).emit('welcome')
+    socket.to(roomName).emit('welcome', socket.nickname)
   })
 
   // 유저가 접속을 중단할 것이지만 아직 방을 완전히 나가지는 않은 상태
   socket.on('disconnecting', () =>
-    socket.rooms.forEach((room) => socket.to(room).emit('bye'))
+    socket.rooms.forEach((room) => socket.to(room).emit('bye', socket.nickname))
   )
 
   // 참여한 방을 확인하고 새로운 메세지를 전달한다.
   socket.on('new_message', (message, roomName, done) => {
-    socket.to(roomName).emit('new_message', message)
+    socket.to(roomName).emit('new_message', `${socket.nickname}: ${message}`)
     done()
   })
+
+  // 닉네임 설정
+  socket.on('nickname', (nickname) => (socket['nickname'] = nickname))
 })
 
 const handleListen = () => console.log(`Listening on http://localhost:3000/`)
