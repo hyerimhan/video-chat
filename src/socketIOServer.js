@@ -18,7 +18,13 @@ const httpServer = http.createServer(app)
 const wsServer = SocketIO(httpServer)
 
 wsServer.on('connection', (socket) => {
-  console.log(socket)
+  // 모든 event를 감시
+  socket.onAny((event) => console.log(`Socket Event: ${event}`))
+  socket.on('enter_room', (roomName, done) => {
+    socket.join(roomName)
+    // app.js emit 세번째 argument인 서버에서 호출하는 function
+    done()
+  })
 })
 
 const handleListen = () => console.log(`Listening on http://localhost:3000/`)
