@@ -13,7 +13,7 @@
 ## ✅ 구현 목록
 
 - [x] 닉네임을 추가해서 채팅 구현
-- [ ] 입장, 퇴장 이벤트 추가
+- [x] 입장, 퇴장 이벤트 추가
 - [ ] 채팅방에 접속중인 인원 확인
 - [ ] 서버에 실시간으로 몇 개의 방이 존재하는지 확인
 
@@ -196,13 +196,17 @@ html(lang="ko")
 
 ### 🔆 Chat with WebSockets
 
-#### 1. ws(webSocket) 설치
+#### ws(webSocket) 설치
 
 ```
 npm i ws
 ```
 
-#### 2. `server.js`에 webSocket 서버 생성할 코드를 추가한다.
+<details>
+  <summary>WebSockets chat 구현 설명</summary>
+  <div markdown="1">
+
+#### 1. `server.js`에 webSocket 서버 생성할 코드를 추가한다.
 
 ```JavaScript
 import http from 'http'
@@ -217,7 +221,7 @@ const wss = new WebSocket.Server({ server })
 server.listen(3000, handleListen)
 ```
 
-#### 3. `app.js`에 서버로 연결하는 코드를 작성한다.
+#### 2. `app.js`에 서버로 연결하는 코드를 작성한다.
 
 ```JavaScript
 // 각 기기마다 localhost가 다른 경우가 있으니 `window.location.host`로 한다.
@@ -225,7 +229,7 @@ server.listen(3000, handleListen)
 let socket = new WebSocket(`ws://${window.location.host}`)
 ```
 
-#### 4. 서버와 브라우저를 연결한다.
+#### 3. 서버와 브라우저를 연결한다.
 
 ```JavaScript
 // server.js
@@ -262,7 +266,7 @@ setTimeout(() => {
 }, 10000)
 ```
 
-#### 5. 다른 브라우저 환경에서도 작동할 수 있는 코드를 작성한다.
+#### 4. 다른 브라우저 환경에서도 작동할 수 있는 코드를 작성한다.
 
 ```JavaScript
 // server.js
@@ -280,20 +284,27 @@ wss.on('connection', (socket) => {
 })
 ```
 
-### 🔆 SocketIO
+  </div>
+</details>
+
+### 🔆 [SocketIO](https://socket.io/)
 
 - websocket은 SocketIO가 실시간, 양방향, event 기반의 통신을 제공하는 방법 중 하나다. (SocketIO는 websocket의 부가기능이 아니다.)
 - 브라우저가 websocket을 지원하지 않거나 연결이 끊어지면 SocketIO는 다른 방법을 이용해서 계속 작동하거나 재연결한다. (SocketIO가 framework이고 탄력성이 뛰어나기 때문)
 - 실시간 통신을 하기 위해서 꼭 사용할 필요는 없지만 실시간 기능 같은 것들을 더 쉽게 만드는 편리한 코드를 제공한다.
 - 브라우저에 설치되어있는 websocket보다 더 무겁다.
 
-#### 1. [SocketIO](https://socket.io/) 설치
+#### SocketIO 설치
 
 ```
 npm i socket.io
 ```
 
-#### 2. `server.js`에 socketIO 서버 생성할 코드를 추가한다.
+<details>
+  <summary>SocketIO chat 구현 설명</summary>
+  <div markdown="1">
+
+#### 1. `server.js`에 socketIO 서버 생성할 코드를 추가한다.
 
 ```JavaScript
 import http from 'http'
@@ -305,7 +316,7 @@ const httpServer = http.createServer(app)
 const wsServer = SocketIO(httpServer)
 ```
 
-#### 3. `home.pug`에 socket.io 스크립트를 추가한다.
+#### 2. `home.pug`에 socket.io 스크립트를 추가한다.
 
 ```pug
 doctype html
@@ -325,7 +336,7 @@ html(lang="ko")
     script(src="/public/js/app.js")
 ```
 
-#### 4. 서버와 브라우저를 연결한다.
+#### 3. 서버와 브라우저를 연결한다.
 
 ```JavaScript
 // server.js
@@ -343,7 +354,7 @@ httpServer.listen(3000, handleListen)
 const socket = io()
 ```
 
-#### 5. 방을 생성 & 입장하는 코드
+#### 4. 방을 생성 & 입장하는 코드
 
 ```JavaScript
 // app.js
@@ -391,7 +402,7 @@ wsServer.on('connection', (socket) => {
 })
 ```
 
-#### 6. 다른 유저가 입장 or 퇴장하면 알림
+#### 5. 다른 유저가 입장 or 퇴장하면 알림
 
 ```JavaScript
 // server.js
@@ -441,7 +452,7 @@ socket.on('welcome', () => addMessage('Someone joined!'))
 socket.on('bye', () => addMessage('Someone left ㅠㅠ'))
 ```
 
-#### 7. 실시간 채팅 서비스
+#### 6. 실시간 채팅 서비스
 
 ```JavaScript
 // server.js
@@ -478,7 +489,7 @@ function showRoom() {
 socket.on('new_message', addMessage)
 ```
 
-#### 8. 닉네임 표시하기
+#### 7. 닉네임 표시하기
 
 ```JavaScript
 // server.js
@@ -522,5 +533,8 @@ function showRoom() {
 socket.on('welcome', (user) => addMessage(`${user} arrived!`))
 socket.on('bye', (user) => addMessage(`${user} left ㅠㅠ`))
 ```
+
+  </div>
+</details>
 
 <br />
