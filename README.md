@@ -194,7 +194,7 @@ html(lang="ko")
   </div>
 </details>
 
-### 🔆 node.js로 서버 생성
+### 🔆 Chat with WebSockets
 
 #### 1. ws(webSocket) 설치
 
@@ -225,9 +225,7 @@ server.listen(3000, handleListen)
 let socket = new WebSocket(`ws://${window.location.host}`)
 ```
 
-### 🔆 Chat with WebSockets
-
-#### 1. 서버와 브라우저를 연결한다.
+#### 4. 서버와 브라우저를 연결한다.
 
 ```JavaScript
 // server.js
@@ -264,12 +262,13 @@ setTimeout(() => {
 }, 10000)
 ```
 
-#### 2. 다른 브라우저 환경에서도 작동할 수 있는 코드를 작성한다.
+#### 5. 다른 브라우저 환경에서도 작동할 수 있는 코드를 작성한다.
 
 ```JavaScript
 // server.js
 
 // fake database
+// 다른 브라우저 환경을 담을 빈 배열
 const sockets = []
 
 wss.on('connection', (socket) => {
@@ -279,6 +278,249 @@ wss.on('connection', (socket) => {
     sockets.forEach((aSocket) => aSocket.send(message.toString()))
   )
 })
+```
+
+### 🔆 SocketIO
+
+- websocket은 SocketIO가 실시간, 양방향, event 기반의 통신을 제공하는 방법 중 하나다. (SocketIO는 websocket의 부가기능이 아니다.)
+- 브라우저가 websocket을 지원하지 않거나 연결이 끊어지면 SocketIO는 다른 방법을 이용해서 계속 작동하거나 재연결한다. (SocketIO가 framework이고 탄력성이 뛰어나기 때문)
+- 실시간 통신을 하기 위해서 꼭 사용할 필요는 없지만 실시간 기능 같은 것들을 더 쉽게 만드는 편리한 코드를 제공한다.
+- 브라우저에 설치되어있는 websocket보다 더 무겁다.
+
+#### 1. [SocketIO](https://socket.io/) 설치
+
+```
+npm i socket.io
+```
+
+#### 2. `server.js`에 socketIO 서버 생성할 코드를 추가한다.
+
+```JavaScript
+import http from 'http'
+import SocketIO from 'socket.io'
+
+// http 서버 생성
+const httpServer = http.createServer(app)
+// SocketIO 서버 생성
+const wsServer = SocketIO(httpServer)
+```
+
+#### 3. `home.pug`에 socket.io 스크립트를 추가한다.
+
+```pug
+doctype html
+html(lang="ko")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    title Video chat
+    //- mvp css는 선택
+    link(rel="stylesheet", href="https://unpkg.com/mvp.css")
+  body
+    header
+      h1 Video chat
+    main
+
+    script(src="/socket.io/socket.io.js")
+    script(src="/public/js/app.js")
+```
+
+#### 4. 서버와 브라우저를 연결한다.
+
+```JavaScript
+// server.js
+wsServer.on('connection', (socket) => {
+  // ...
+})
+
+const handleListen = () => console.log(`Listening on http://localhost:3000/`)
+httpServer.listen(3000, handleListen)
+```
+
+```JavaScript
+// app.js
+// io function은 알아서 socket.io를 실행하고 있는 서버를 찾는다.
+const socket = io()
+```
+
+#### 5. 방을 생성 & 입장하는 코드
+
+```JavaScript
+// app.js
+
+const welcome = document.getElementById('welcome')
+const form = welcome.querySelector('form')
+const room = document.getElementById('room')
+
+room.hidden = true
+
+let roomName
+
+function showRoom() {
+  welcome.hidden = true
+  room.hidden = false
+  const h3 = room.querySelector('h3')
+  h3.innerText = `Room ${roomName}`
+}
+
+function handleRoomSubmit(event) {
+  event.preventDefault()
+  const input = form.querySelector('input')
+  // websocket에서 서버로 보낼 때 사용했던 "send" 대신 emit을 사용한다.
+  // 첫번째 argument에는 event이름, 두번째 보내고 싶은 payload, 세번째 서버에서 호출하는 function 등 원하는만큼 argument를 사용할 수 있다. (websocket은 string만 가능)
+  // 단, function은 emit의 마지막 argument 여야 한다.
+  socket.emit('enter_room', { payload: input.value }, showRoom)
+  roomName = input.value
+  input.value = ''
+}
+
+form.addEventListener('submit', handleRoomSubmit)
+```
+
+```JavaScript
+// server.js
+
+wsServer.on('connection', (socket) => {
+  // 모든 event를 감시
+  socket.onAny((event) => console.log(`Socket Event: ${event}`))
+  socket.on('enter_room', (roomName, done) => {
+    socket.join(roomName.payload)
+    // app.js emit 세번째 argument인 서버에서 호출하는 function
+    done()
+  })
+})
+```
+
+#### 6. 다른 유저가 입장 or 퇴장하면 알림
+
+```JavaScript
+// server.js
+
+wsServer.on('connection', (socket) => {
+  // ...
+  socket.on('enter_room', (roomName, done) => {
+    // ...
+    // 방에 다른 유저들이 입장하는지 확인
+    socket.to(roomName.payload).emit('welcome')
+  })
+
+  // 유저가 접속을 중단할 것이지만 아직 방을 완전히 나가지는 않은 상태(퇴장)
+  socket.on('disconnecting', () =>
+    socket.rooms.forEach((room) => socket.to(room).emit('bye'))
+  )
+})
+```
+
+```JavaScript
+// app.js
+
+function addMessage(message) {
+  const ul = room.querySelector('ul')
+  const li = document.createElement('li')
+  li.innerText = message
+  ul.appendChild(li)
+}
+
+function handleMessageSubmit(event) {
+  event.preventDefault()
+  const input = room.querySelector('input')
+  socket.emit('new_message', input.value, roomName, () => {
+    addMessage(`You: ${input.value}`)
+    input.value = ''
+  })
+}
+
+function showRoom() {
+  // ...
+  const form = room.querySelector('form')
+  form.addEventListener('submit', handleMessageSubmit)
+}
+
+// 방에 다른 유저들이 입퇴장하면 전체 메세지로 알려줌
+socket.on('welcome', () => addMessage('Someone joined!'))
+socket.on('bye', () => addMessage('Someone left ㅠㅠ'))
+```
+
+#### 7. 실시간 채팅 서비스
+
+```JavaScript
+// server.js
+
+wsServer.on('connection', (socket) => {
+  // ...
+
+  // 참여한 방을 확인하고 새로운 메세지를 전달한다.
+  socket.on('new_message', (message, roomName, done) => {
+    socket.to(roomName).emit('new_message', message)
+    done()
+    })
+})
+```
+
+```JavaScript
+// app.js
+
+function handleMessageSubmit(event) {
+  event.preventDefault()
+  const input = room.querySelector('input')
+  socket.emit('new_message', input.value, roomName, () => {
+    addMessage(`You: ${input.value}`)
+    input.value = ''
+  })
+}
+
+function showRoom() {
+  // ...
+  const form = room.querySelector('form')
+  form.addEventListener('submit', handleMessageSubmit)
+}
+
+socket.on('new_message', addMessage)
+```
+
+#### 8. 닉네임 표시하기
+
+```JavaScript
+// server.js
+
+wsServer.on('connection', (socket) => {
+  socket['nickname'] = 'Anon'
+  socket.on('enter_room', (roomName, done) => {
+    // ...
+    socket.to(roomName).emit('welcome', socket.nickname)
+  })
+
+  socket.on('disconnecting', () =>
+    socket.rooms.forEach((room) => socket.to(room).emit('bye', socket.nickname))
+  )
+
+  socket.on('new_message', (message, roomName, done) => {
+    socket.to(roomName).emit('new_message', `${socket.nickname}: ${message}`)
+    done()
+  })
+
+  // 닉네임 설정
+  socket.on('nickname', (nickname) => (socket['nickname'] = nickname))
+})
+```
+
+```JavaScript
+// app.js
+
+function handleNicknameSubmit(event) {
+  event.preventDefault()
+  const input = room.querySelector('#name input')
+  socket.emit('nickname', input.value)
+}
+
+function showRoom() {
+  // ...
+  const nameForm = room.querySelector('#name')
+  nameForm.addEventListener('submit', handleNicknameSubmit)
+}
+
+socket.on('welcome', (user) => addMessage(`${user} arrived!`))
+socket.on('bye', (user) => addMessage(`${user} left ㅠㅠ`))
 ```
 
 <br />
