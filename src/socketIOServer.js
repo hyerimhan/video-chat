@@ -17,6 +17,21 @@ const httpServer = http.createServer(app)
 // SocketIO 서버 생성
 const wsServer = SocketIO(httpServer)
 
+function publicRooms() {
+  const {
+    sockets: {
+      adapter: { sids, rooms },
+    },
+  } = wsServer
+  const publicRooms = []
+  rooms.forEach((_, key) => {
+    if (sids.get(key) === undefined) {
+      publicRooms.push(key)
+    }
+  })
+  return publicRooms
+}
+
 wsServer.on('connection', (socket) => {
   socket['nickname'] = 'Anon'
   // 모든 event를 감시
@@ -27,12 +42,19 @@ wsServer.on('connection', (socket) => {
     done()
     // 방에 다른 유저들이 입장하는지 확인
     socket.to(roomName).emit('welcome', socket.nickname)
+    // 모든 방에 알림 메세지
+    wsServer.sockets.emit('room_change', publicRooms())
   })
 
   // 유저가 접속을 중단할 것이지만 아직 방을 완전히 나가지는 않은 상태
-  socket.on('disconnecting', () =>
+  socket.on('disconnecting', () => {
     socket.rooms.forEach((room) => socket.to(room).emit('bye', socket.nickname))
-  )
+  })
+
+  // 방을 완전히 나간 상태
+  socket.on('disconnect', () => {
+    wsServer.sockets.emit('room_change', publicRooms())
+  })
 
   // 참여한 방을 확인하고 새로운 메세지를 전달한다.
   socket.on('new_message', (message, roomName, done) => {
