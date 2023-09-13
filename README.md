@@ -12,10 +12,17 @@
 
 ## ✅ 구현 목록
 
+### SocketIO
+
 - [x] 닉네임을 추가해서 채팅 구현
 - [x] 입장, 퇴장 이벤트 추가
-- [ ] 채팅방에 접속중인 인원 확인
-- [ ] 서버에 실시간으로 몇 개의 방이 존재하는지 확인
+- [x] 채팅방에 접속중인 인원 확인
+- [x] 서버에 실시간으로 몇 개의 방이 존재하는지 확인
+
+### WebRTC
+
+- [ ] 비디오 화면에 출력
+- [ ] 음소거, 카메라 on/off 버튼
 
 <br />
 
@@ -667,3 +674,65 @@ instrument(wsServer, {
 </details>
 
 <br />
+
+### 🔆 Video call
+
+<details>
+  <summary>WebRTC 영상 채팅 구현 설명</summary>
+  <div markdown="1">
+
+#### 유저로부터 비디오를 가져와 화면에 비디오 출력
+
+```JavaScript
+// app.js
+
+const socket = io()
+
+const myFace = document.getElementById('myFace')
+const muteBtn = document.getElementById('mute')
+const cameraBtn = document.getElementById('camera')
+
+let myStream
+let muted = false
+let cameraOff = false
+
+// 유저 비디오 연결 함수
+async function getMedia() {
+  try {
+    myStream = await navigator.mediaDevices.getUserMedia({
+      audio: true,
+      video: true,
+    })
+    myFace.srcObject = myStream
+  } catch (e) {
+    console.log(e)
+  }
+}
+
+getMedia()
+
+function handleMuteClick() {
+  if (!muted) {
+    muteBtn.innerText = 'Unmute'
+    muted = true
+  } else {
+    muteBtn.innerText = 'Mute'
+    muted = false
+  }
+}
+function handleCameraClick() {
+  if (!cameraOff) {
+    cameraBtn.innerText = 'Turn Camera On'
+    cameraOff = true
+  } else {
+    cameraBtn.innerText = 'Turn Camera Off'
+    cameraOff = false
+  }
+}
+
+muteBtn.addEventListener('click', handleMuteClick)
+cameraBtn.addEventListener('click', handleCameraClick)
+```
+
+  </div>
+</details>
