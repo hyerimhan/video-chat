@@ -411,7 +411,7 @@ wsServer.on('connection', (socket) => {
   // ...
   socket.on('enter_room', (roomName, done) => {
     // ...
-    // 방에 다른 유저들이 입장하는지 확인
+    // 하나의 방에 다른 유저들이 입장하는지 확인
     socket.to(roomName.payload).emit('welcome')
   })
 
@@ -534,6 +534,135 @@ socket.on('welcome', (user) => addMessage(`${user} arrived!`))
 socket.on('bye', (user) => addMessage(`${user} left ㅠㅠ`))
 ```
 
+#### 8. 생성된 방 리스트로 표시하기
+
+```JavaScript
+// server.js
+
+function publicRooms() {
+  // SocketIO에서 "adapter"는 서버들 사이에 실시간 어플리케이션을 동기화 한다.
+  const {
+    sockets: {
+      adapter: { sids, rooms },
+    },
+  } = wsServer
+  const publicRooms = []
+  rooms.forEach((_, key) => {
+    if (sids.get(key) === undefined) {
+      publicRooms.push(key)
+    }
+  })
+  return publicRooms
+}
+
+wsServer.on('connection', (socket) => {
+  // ...
+  socket.on('enter_room', (roomName, done) => {
+    // ...
+    // 모든 방에 알림 메세지
+    wsServer.sockets.emit('room_change', publicRooms())
+  })
+
+  // 방을 완전히 나간 상태
+  socket.on('disconnect', () => {
+    wsServer.sockets.emit('room_change', publicRooms())
+  })
+})
+```
+
+```JavaScript
+// app.js
+
+socket.on('room_change', (rooms) => {
+  const roomList = welcome.querySelector('ul')
+  roomList.innerHTML = ''
+  if (rooms.length === 0) return
+  rooms.forEach((room) => {
+    const li = document.createElement('li')
+    li.innerText = room
+    roomList.appendChild(li)
+  })
+})
+```
+
+#### 8. 방에 참여한 인원수
+
+```JavaScript
+// server.js
+
+// 인원수 체크 함수
+function countRoom(roomName) {
+  return wsServer.sockets.adapter.rooms.get(roomName)?.size
+}
+
+wsServer.on('connection', (socket) => {
+  // ...
+  socket.on('enter_room', (roomName, done) => {
+    // ...
+    // 입장할 때 인원수 체크 함수 추가
+    socket.to(roomName).emit('welcome', socket.nickname, countRoom(roomName))
+  })
+
+  socket.on('disconnecting', () => {
+    socket.rooms.forEach((room) =>
+      // 퇴장할 때 인원수 체크 함수 추가
+      // 아직 방을 완전히 나가지는 않은 상태이기 때문에 인원수에 나도 포함되어 있는 상태이기 때문에 "countRoom(room) - 1" 한다.
+      socket.to(room).emit('bye', socket.nickname, countRoom(room) - 1)
+    )
+  })
+})
+```
+
+```JavaScript
+// app.js
+
+function roomTitle(newCount) {
+  const h3 = room.querySelector('h3')
+  h3.innerText = `Room ${roomName} ${newCount ? `(${newCount})` : ''}`
+}
+
+// newCount 추가
+socket.on('welcome', (user, newCount) => {
+  // ...
+  roomTitle(newCount)
+})
+socket.on('bye', (user, newCount) => {
+  // ...
+  roomTitle(newCount)
+})
+```
+
+#### 💡 Bonus. Admin Panel
+
+##### socketIO 관리자 ui 설치
+
+```
+npm i @socket.io/admin-ui
+```
+
+##### `server.js` 적용
+
+```JavaScript
+import { Server } from 'socket.io'
+import { instrument } from '@socket.io/admin-ui'
+
+const wsServer = new Server(httpServer, {
+  cors: {
+    origin: ['https://admin.socket.io'],
+    credentials: true,
+  },
+})
+instrument(wsServer, {
+  auth: false,
+})
+```
+
+##### [어드민 페이지](https://admin.socket.io)에 `서버가 있는 주소/admin`를 입력한 후 , "CONNECT"버튼을 클릭한다.
+
+> 이때, "option"에서 기본으로 설정되어있는 옵션을 전부 삭제한다.
+
+<img src="https://github.com/hyerimhan/video-chat/assets/64674174/a2be9754-a327-4c78-bbdc-59813f84454c">
+<img src="https://github.com/hyerimhan/video-chat/assets/64674174/2cdc4bc6-b0ae-4ec0-9bf1-3eef32db28a7">
   </div>
 </details>
 
