@@ -21,8 +21,8 @@
 
 ### WebRTC
 
-- [ ] 비디오 화면에 출력
-- [ ] 음소거, 카메라 on/off 버튼
+- [x] 비디오 화면에 출력
+- [x] 음소거, 카메라 on/off 버튼
 
 <br />
 
@@ -681,7 +681,7 @@ instrument(wsServer, {
   <summary>WebRTC 영상 채팅 구현 설명</summary>
   <div markdown="1">
 
-#### 유저로부터 비디오를 가져와 화면에 비디오 출력
+#### 1. 유저로부터 비디오를 가져와 화면에 비디오 출력
 
 ```JavaScript
 // app.js
@@ -732,6 +732,47 @@ function handleCameraClick() {
 
 muteBtn.addEventListener('click', handleMuteClick)
 cameraBtn.addEventListener('click', handleCameraClick)
+```
+
+#### 2. 음소거, 카메라 on/off
+
+```JavaScript
+// app.js
+
+function handleMuteClick() {
+  // 음소거 on/off
+  myStream.getAudioTracks().forEach((track) => (track.enabled = !track.enabled))
+  // ...
+}
+function handleCameraClick() {
+  // 카메라 on/off
+  myStream.getVideoTracks().forEach((track) => (track.enabled = !track.enabled))
+  // ...
+}
+```
+
+#### 2. 유저가 가지고 있는 카메라들의 목록
+
+```JavaScript
+// app.js
+
+const camerasSelect = document.getElementById('cameras')
+
+async function getCameras() {
+  try {
+    // enumerateDevices: 컴퓨터에 연결되거나 모바일이 가지고 있는 모든 장치와 미디어 장치를 알려준다.
+    const devices = await navigator.mediaDevices.enumerateDevices()
+    const cameras = devices.filter((device) => device.kind === 'videoinput')
+    cameras.forEach((camera) => {
+      const option = document.createElement('option')
+      option.value = camera.deviceId
+      option.innerText = camera.label
+      camerasSelect.appendChild(option)
+    })
+  } catch (e) {
+    console.log(e)
+  }
+}
 ```
 
   </div>
