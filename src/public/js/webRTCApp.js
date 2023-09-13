@@ -14,10 +14,12 @@ async function getCameras() {
     // enumerateDevices: 컴퓨터에 연결되거나 모바일이 가지고 있는 모든 장치와 미디어 장치를 알려준다.
     const devices = await navigator.mediaDevices.enumerateDevices()
     const cameras = devices.filter((device) => device.kind === 'videoinput')
+    const currentCamera = myStream.getVideoTracks()[0]
     cameras.forEach((camera) => {
       const option = document.createElement('option')
       option.value = camera.deviceId
       option.innerText = camera.label
+      if (currentCamera.label === camera.label) option.selected = true
       camerasSelect.appendChild(option)
     })
   } catch (e) {
@@ -26,14 +28,26 @@ async function getCameras() {
 }
 
 // 유저 비디오 연결 함수
-async function getMedia() {
+async function getMedia(deviceId) {
+  // 카메라가 deviceId없이 맨 처음 랜더링 됐을 떄 (초기 랜더링)
+  // deviceId가 없을 때
+  const initialConstrains = {
+    audio: true,
+    // 모바일에서 selfie모드
+    video: { facingMode: 'user' },
+  }
+  // deviceId가 있을 때
+  const cameraConstrains = {
+    audio: true,
+    // 특정 카메라 지정
+    video: { deviceId: { exact: deviceId } },
+  }
   try {
-    myStream = await navigator.mediaDevices.getUserMedia({
-      audio: true,
-      video: true,
-    })
+    myStream = await navigator.mediaDevices.getUserMedia(
+      deviceId ? cameraConstrains : initialConstrains
+    )
     myFace.srcObject = myStream
-    await getCameras()
+    if (!deviceId) await getCameras()
   } catch (e) {
     console.log(e)
   }
@@ -62,5 +76,10 @@ function handleCameraClick() {
   }
 }
 
+async function handleCameraChange() {
+  await getMedia(camerasSelect.value)
+}
+
 muteBtn.addEventListener('click', handleMuteClick)
 cameraBtn.addEventListener('click', handleCameraClick)
+camerasSelect.addEventListener('input', handleCameraChange)
