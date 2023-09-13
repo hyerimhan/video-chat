@@ -8,6 +8,11 @@ room.hidden = true
 
 let roomName
 
+function roomTitle(newCount) {
+  const h3 = room.querySelector('h3')
+  h3.innerText = `Room ${roomName} ${newCount ? `(${newCount})` : ''}`
+}
+
 function addMessage(message) {
   const ul = room.querySelector('ul')
   const li = document.createElement('li')
@@ -33,8 +38,7 @@ function handleNicknameSubmit(event) {
 function showRoom() {
   welcome.hidden = true
   room.hidden = false
-  const h3 = room.querySelector('h3')
-  h3.innerText = `Room ${roomName}`
+  roomTitle()
   const messageForm = room.querySelector('#message')
   const nameForm = room.querySelector('#name')
   messageForm.addEventListener('submit', handleMessageSubmit)
@@ -55,8 +59,14 @@ function handleRoomSubmit(event) {
 form.addEventListener('submit', handleRoomSubmit)
 
 // 방에 다른 유저들이 입장 or 퇴장하면 전체 메세지로 알려줌
-socket.on('welcome', (user) => addMessage(`${user} arrived!`))
-socket.on('bye', (user) => addMessage(`${user} left ㅠㅠ`))
+socket.on('welcome', (user, newCount) => {
+  addMessage(`${user} arrived!`)
+  roomTitle(newCount)
+})
+socket.on('bye', (user, newCount) => {
+  addMessage(`${user} left ㅠㅠ`)
+  roomTitle(newCount)
+})
 
 socket.on('new_message', addMessage)
 socket.on('room_change', (rooms) => {

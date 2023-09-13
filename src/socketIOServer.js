@@ -18,6 +18,7 @@ const httpServer = http.createServer(app)
 const wsServer = SocketIO(httpServer)
 
 function publicRooms() {
+  // SocketIO에서 "adapter"는 서버들 사이에 실시간 어플리케이션을 동기화 한다.
   const {
     sockets: {
       adapter: { sids, rooms },
@@ -32,6 +33,10 @@ function publicRooms() {
   return publicRooms
 }
 
+function countRoom(roomName) {
+  return wsServer.sockets.adapter.rooms.get(roomName)?.size
+}
+
 wsServer.on('connection', (socket) => {
   socket['nickname'] = 'Anon'
   // 모든 event를 감시
@@ -41,14 +46,17 @@ wsServer.on('connection', (socket) => {
     // app.js emit 마지막 argument인 서버에서 호출하는 function (FE에서 코드 실행)
     done()
     // 방에 다른 유저들이 입장하는지 확인
-    socket.to(roomName).emit('welcome', socket.nickname)
+    socket.to(roomName).emit('welcome', socket.nickname, countRoom(roomName))
     // 모든 방에 알림 메세지
     wsServer.sockets.emit('room_change', publicRooms())
   })
 
   // 유저가 접속을 중단할 것이지만 아직 방을 완전히 나가지는 않은 상태
   socket.on('disconnecting', () => {
-    socket.rooms.forEach((room) => socket.to(room).emit('bye', socket.nickname))
+    socket.rooms.forEach((room) =>
+      // 아직 방을 완전히 나가지는 않은 상태이기 때문에 인원수에 나도 포함되어 있는 상태이기 때문에 "countRoom(room) - 1" 한다.
+      socket.to(room).emit('bye', socket.nickname, countRoom(room) - 1)
+    )
   })
 
   // 방을 완전히 나간 상태
