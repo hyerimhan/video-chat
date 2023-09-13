@@ -680,6 +680,8 @@ instrument(wsServer, {
 <details>
   <summary>WebRTC 영상 채팅 구현 설명</summary>
   <div markdown="1">
+  
+  > [참고문서](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices)
 
 #### 1. 유저로부터 비디오를 가져와 화면에 비디오 출력
 
@@ -751,7 +753,7 @@ function handleCameraClick() {
 }
 ```
 
-#### 2. 유저가 가지고 있는 카메라들의 목록
+#### 2. 유저가 가지고 있는 카메라 목록
 
 ```JavaScript
 // app.js
@@ -773,6 +775,58 @@ async function getCameras() {
     console.log(e)
   }
 }
+```
+
+#### 3. 카메라 목록의 카메라를 선택하면 강제적으로 선택한 새로운 카메라로 stream을 다시 시작한다.
+
+```JavaScript
+// app.js
+
+async function getCameras() {
+  try {
+    // ...
+    // 처음 렌더링 될 때 현재 사용중인 카메라가 선택되어 있도록한다.
+    const currentCamera = myStream.getVideoTracks()[0]
+    cameras.forEach((camera) => {
+      // ...
+      if (currentCamera.label === camera.label) option.selected = true
+    })
+  } catch (e) {
+    console.log(e)
+  }
+}
+
+// 유저 비디오 연결 함수
+async function getMedia(deviceId) {
+  // 카메라가 deviceId없이 맨 처음 랜더링 됐을 떄 (초기 랜더링)
+  // deviceId가 없을 때
+  const initialConstrains = {
+    audio: true,
+    // 모바일에서 selfie모드
+    video: { facingMode: 'user' },
+  }
+  // deviceId가 있을 때
+  const cameraConstrains = {
+    audio: true,
+    // 특정 카메라 지정
+    video: { deviceId: { exact: deviceId } },
+  }
+  try {
+    myStream = await navigator.mediaDevices.getUserMedia(
+      deviceId ? cameraConstrains : initialConstrains
+    )
+    // ...
+    if (!deviceId) await getCameras()
+  } catch (e) {
+    console.log(e)
+  }
+}
+
+async function handleCameraChange() {
+  await getMedia(camerasSelect.value)
+}
+
+camerasSelect.addEventListener('input', handleCameraChange)
 ```
 
   </div>
