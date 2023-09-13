@@ -1,5 +1,6 @@
 import http from 'http'
-import SocketIO from 'socket.io'
+import { Server } from 'socket.io'
+import { instrument } from '@socket.io/admin-ui'
 import express from 'express'
 
 const app = express()
@@ -15,7 +16,15 @@ app.get('/*', (_, res) => res.render('socketIOHome'))
 // http 서버 생성
 const httpServer = http.createServer(app)
 // SocketIO 서버 생성
-const wsServer = SocketIO(httpServer)
+const wsServer = new Server(httpServer, {
+  cors: {
+    origin: ['https://admin.socket.io'],
+    credentials: true,
+  },
+})
+instrument(wsServer, {
+  auth: false,
+})
 
 function publicRooms() {
   // SocketIO에서 "adapter"는 서버들 사이에 실시간 어플리케이션을 동기화 한다.
