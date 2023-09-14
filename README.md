@@ -1075,7 +1075,7 @@ function makeConnection() {
 }
 ```
 
-#### 6. Data channel (peer가 많아지면 느려지는 WebRTC의 단점을 보완)
+#### 7. Data channel (peer가 많아지면 느려지는 WebRTC의 단점을 보완)
 
 ```JavaScript
 // app.js
