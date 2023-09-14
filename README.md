@@ -136,13 +136,13 @@ npm i @babel/preset-env -D
 }
 ```
 
-#### 8. `express`와 `pug`를 설치한다.
+#### 9. `express`와 `pug`를 설치한다.
 
 ```
 npm i express pug
 ```
 
-#### 9. `server.js`에 `express`를 가져온 다음, app을 만든다.
+#### 10. `server.js`에 `express`를 가져온 다음, app을 만든다.
 
 ```JavaScript
 import express from 'express'
