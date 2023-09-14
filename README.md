@@ -838,7 +838,7 @@ camerasSelect.addEventListener('input', handleCameraChange)
 
 > 참고문서: [https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API)
 
-<img src="https://github.com/hyerimhan/video-chat/assets/64674174/31fee755-2f47-4024-a3c8-b3e9ab6e0d4c">
+<img src="https://github.com/hyerimhan/video-chat/assets/64674174/31fee755-2f47-4024-a3c8-b3e9ab6e0d4c" widtn="100%">
 
 - WebSocket과 달리 내가 보낸 영상과 오디오, 메시지 등이 서버로 가지 않고 직접 수신하기 때문에 빠르다. (peer-to-peer)
 - 서버는 수신할 IP나 port(브라우저의 위치), setting, configuration등 서버의 상태를 알아야 할 경우에만 필요하다.
