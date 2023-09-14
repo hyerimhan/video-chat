@@ -294,7 +294,9 @@ wss.on('connection', (socket) => {
   </div>
 </details>
 
-### 🔆 [SocketIO](https://socket.io/)
+### 🔆 SocketIO
+
+> 참고문서: [https://socket.io/](https://socket.io/)
 
 - websocket은 SocketIO가 실시간, 양방향, event 기반의 통신을 제공하는 방법 중 하나다. (SocketIO는 websocket의 부가기능이 아니다.)
 - 브라우저가 websocket을 지원하지 않거나 연결이 끊어지면 SocketIO는 다른 방법을 이용해서 계속 작동하거나 재연결한다. (SocketIO가 framework이고 탄력성이 뛰어나기 때문)
@@ -592,7 +594,7 @@ socket.on('room_change', (rooms) => {
 })
 ```
 
-#### 8. 방에 참여한 인원수
+#### 9. 방에 참여한 인원수
 
 ```JavaScript
 // server.js
@@ -677,11 +679,11 @@ instrument(wsServer, {
 
 ### 🔆 Video call
 
+> 참고문서: [https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices)
+
 <details>
-  <summary>WebRTC 영상 채팅 구현 설명</summary>
+  <summary>영상 & 오디오 불러오기 구현 설명</summary>
   <div markdown="1">
-  
-  > [참고문서](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices)
 
 #### 1. 유저로부터 비디오를 가져와 화면에 비디오 출력
 
@@ -753,7 +755,7 @@ function handleCameraClick() {
 }
 ```
 
-#### 2. 유저가 가지고 있는 카메라 목록
+#### 3. 유저가 가지고 있는 카메라 목록
 
 ```JavaScript
 // app.js
@@ -777,7 +779,7 @@ async function getCameras() {
 }
 ```
 
-#### 3. 카메라 목록의 카메라를 선택하면 강제적으로 선택한 새로운 카메라로 stream을 다시 시작한다.
+#### 4. 카메라 목록의 카메라를 선택하면 강제적으로 선택한 새로운 카메라로 stream을 다시 시작한다.
 
 ```JavaScript
 // app.js
@@ -828,6 +830,24 @@ async function handleCameraChange() {
 
 camerasSelect.addEventListener('input', handleCameraChange)
 ```
+
+  </div>
+</details>
+
+### 🔆 WebRTC
+
+> 참고문서: [https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API)
+
+![WebRTC-1](https://github.com/hyerimhan/video-chat/assets/64674174/31fee755-2f47-4024-a3c8-b3e9ab6e0d4c)
+
+- WebSocket과 달리 내가 보낸 영상과 오디오, 메시지 등이 서버로 가지 않고 직접 수신하기 때문에 빠르다. (peer-to-peer)
+- 서버는 수신할 IP나 port(브라우저의 위치), setting, configuration등 서버의 상태를 알아야 할 경우에만 필요하다.
+
+<details>
+  <summary>WebRTC 영상 채팅 구현 설명</summary>
+  <div markdown="1">
+  
+  #### 1.
 
   </div>
 </details>
