@@ -23,6 +23,7 @@
 
 - [x] 비디오 화면에 출력
 - [x] 음소거, 카메라 on/off 버튼
+- [x] 소유한 카메라중, 화상채팅에 사용할 원하는 카메라로 변경
 
 <br />
 
@@ -842,12 +843,239 @@ camerasSelect.addEventListener('input', handleCameraChange)
 
 - WebSocket과 달리 내가 보낸 영상과 오디오, 메시지 등이 서버로 가지 않고 직접 수신하기 때문에 빠르다. (peer-to-peer)
 - 서버는 수신할 IP나 port(브라우저의 위치), setting, configuration등 서버의 상태를 알아야 할 경우에만 필요하다.
+- 연결해야 할 peer가 많아질 수록 느려진다.
 
 <details>
   <summary>WebRTC 영상 채팅 구현 설명</summary>
   <div markdown="1">
   
-  #### 1.
+  #### 1. 방만들기
+```JavaScript
+// server.js
+wsServer.on('connection', (socket) => {
+  socket.on('join_room', (roomName, done) => {
+    socket.join(roomName)
+    done()
+    socket.to(roomName).emit('welcome')
+  })
+})
+```
+
+```JavaScript
+// app.js
+
+const call = document.getElementById('call')
+
+call.hidden = true
+
+let roomName
+
+// Welcome Form (join a room)
+const welcome = document.getElementById('welcome')
+const welcomeForm = welcome.querySelector('form')
+
+function initCall() {
+welcome.hidden = true
+call.hidden = false
+getMedia()
+}
+
+function handleWelcomeSubmit(event) {
+event.preventDefault()
+const input = welcomeForm.querySelector('input')
+socket.emit('join_room', input.value, initCall)
+roomName = input.value
+input.value = ''
+}
+welcomeForm.addEventListener('submit', handleWelcomeSubmit)
+
+// Socket on
+socket.on('welcome', () => {
+console.log('someone joined')
+})
+
+```
+
+#### 2. 양쪽 브라우저에 RTC연결
+
+```JavaScript
+// app.js
+
+wsServer.on('connection', (socket) => {
+  // ...
+  socket.on('offer', (offer, roomName) => {
+    socket.to(roomName).emit('offer', offer)
+  })
+})
+```
+
+```JavaScript
+let myPeerConnection
+
+async function initCall() {
+  // ...
+  await getMedia()
+  makeConnection()
+}
+
+// Socket code
+socket.on('welcome', async () => {
+  const offer = await myPeerConnection.createOffer()
+  myPeerConnection.setLocalDescription(offer)
+  console.log('Send the offer')
+  socket.emit('offer', offer, roomName)
+})
+
+socket.on('offer', (offer) => {
+  console.log(offer)
+})
+
+// RTC code
+function makeConnection() {
+  myPeerConnection = new RTCPeerConnection()
+  myStream
+    .getTracks()
+    .forEach((track) => myPeerConnection.addTrack(track, myStream))
+}
+```
+
+#### 3. peer to peer 통신하기
+
+```JavaScript
+// server.js
+
+wsServer.on('connection', (socket) => {
+  socket.on('join_room', (roomName) => {
+    socket.join(roomName)
+    socket.to(roomName).emit('welcome')
+  })
+  // ...
+  socket.on('answer', (answer, roomName) => {
+    socket.to(roomName).emit('answer', answer)
+  })
+})
+```
+
+```JavaScript
+// app.js
+
+// Welcome Form (join a room)
+async function handleWelcomeSubmit(event) {
+  // ...
+  await initCall()
+  socket.emit('join_room', input.value)
+  // ...
+}
+
+// Socket code
+socket.on('offer', async (offer) => {
+  myPeerConnection.setRemoteDescription(offer)
+  const answer = await myPeerConnection.createAnswer()
+  myPeerConnection.setLocalDescription(answer)
+  socket.emit('answer', answer, roomName)
+})
+socket.on('answer', (answer) => {
+  myPeerConnection.setRemoteDescription(answer)
+})
+```
+
+#### 4. 인터넷 연결 생성(IceCandidate)
+
+> webRTC에 필요한 프로토콜들을 의미하는데 멀리 떨어진 장치와 소통할 수 있게 하기 위함이다.
+
+```JavaScript
+// server.js
+wsServer.on('connection', (socket) => {
+  // ...
+  socket.on('ice', (ice, roomName) => socket.to(roomName).emit('ice', ice))
+})
+```
+
+```JavaScript
+// app.js
+
+// Socket code
+socket.on('ice', (ice) => {
+  myPeerConnection.addIceCandidate(ice)
+})
+
+// RTC code
+function makeConnection() {
+  // ...
+  myPeerConnection.addEventListener('icecandidate', handleIce)
+  myPeerConnection.addEventListener('addstream', handleAddStream)
+  // ...
+}
+
+function handleIce(data) {
+  socket.emit('ice', data.candidate, roomName)
+}
+
+function handleAddStream(data) {
+  const peerFace = document.getElementById('peerFace')
+  peerFace.srcObject = data.stream
+}
+```
+
+#### 5. 카메라 변경 시, 다른 브라우저에도 반영
+
+```JavaScript
+// app.js
+
+async function handleCameraChange() {
+  // ...
+  if (myPeerConnection) {
+    const videoTrack = myStream.getVideoTracks()[0]
+    // sender는 peer로 보내진 media stream track을 컨트롤하게 해준다.
+    const videoSender = myPeerConnection.getSenders().find((sender) => {
+      sender.track.kind === 'video'
+    })
+    videoSender.replaceTrack(videoTrack)
+  }
+}
+```
+
+#### 💡 Bonus. 모바일에서 테스트하기
+
+##### localtunnel 설치
+
+```
+npm i localtunnel
+```
+
+##### localtunnel 실행
+
+```
+npx localtunnel --port [포트번호]
+<!-- ex) npx localtunnel --port 3000 -->
+```
+
+#### 6. STUN 서버로 컴퓨터 공용 IP주소 찾기
+
+> webRTC를 사용한 실제 서비스나 전문적인 뭔가를 만들고 싶다면 직접 STUN 서버를 운영해야 한다. STUN 서버는 나의 장치에 공용주소를 알려주는 서버이다.
+
+```JavaScript
+// app.js
+
+// RTC code
+function makeConnection() {
+  myPeerConnection = new RTCPeerConnection({
+    // 구글이 무료로 제공하는 리스트
+    iceServers: [
+      {
+        urls: [
+          'stun:stun.l.google.com:19302',
+          'stun:stun1.l.google.com:19302',
+          'stun:stun2.l.google.com:19302',
+          'stun:stun3.l.google.com:19302',
+          'stun:stun4.l.google.com:19302',
+        ],
+      },
+    ],
+  })
+  // ...
+}
+```
 
   </div>
 </details>
