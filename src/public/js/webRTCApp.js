@@ -132,10 +132,12 @@ socket.on('offer', async (offer) => {
   socket.emit('answer', answer, roomName)
   console.log('sent the answer')
 })
+
 socket.on('answer', (answer) => {
   console.log('received the answer')
   myPeerConnection.setRemoteDescription(answer)
 })
+
 socket.on('ice', (ice) => {
   console.log('received candidate')
   myPeerConnection.addIceCandidate(ice)
@@ -143,7 +145,20 @@ socket.on('ice', (ice) => {
 
 // RTC code
 function makeConnection() {
-  myPeerConnection = new RTCPeerConnection()
+  myPeerConnection = new RTCPeerConnection({
+    // 구글이 무료로 제공하는 리스트
+    iceServers: [
+      {
+        urls: [
+          'stun:stun.l.google.com:19302',
+          'stun:stun1.l.google.com:19302',
+          'stun:stun2.l.google.com:19302',
+          'stun:stun3.l.google.com:19302',
+          'stun:stun4.l.google.com:19302',
+        ],
+      },
+    ],
+  })
   myPeerConnection.addEventListener('icecandidate', handleIce)
   myPeerConnection.addEventListener('addstream', handleAddStream)
   myStream
