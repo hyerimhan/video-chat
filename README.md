@@ -36,7 +36,7 @@
 ### 🔆 WebSocket이란?
 
 - 실시간 chat, notification 등과 같은 real-time을 만들 수 있다.<br/>
-<img width="100%" src="https://github.com/hyerimhan/video-chat/assets/64674174/6a5dc5e9-f9c9-48d8-8651-ded932c1101e"/>
+<img width="100%" src="https://github.com/hyerimhan/video-chat/assets/64674174/04b6c868-cb25-4eb3-85d2-195c139b14d8"/>
 <table border>
   <thead>
     <th></th>
@@ -668,8 +668,8 @@ instrument(wsServer, {
 
 > 이때, "option"에서 기본으로 설정되어있는 옵션을 전부 삭제한다.
 
-<img src="https://github.com/hyerimhan/video-chat/assets/64674174/a2be9754-a327-4c78-bbdc-59813f84454c">
-<img src="https://github.com/hyerimhan/video-chat/assets/64674174/2cdc4bc6-b0ae-4ec0-9bf1-3eef32db28a7">
+<img src="https://github.com/hyerimhan/video-chat/assets/64674174/02fbcad4-f3fb-44ec-bd7d-ccef224f5203">
+<img src="https://github.com/hyerimhan/video-chat/assets/64674174/c8b50ce1-745e-43b0-a94e-9c329e9c9d80">
   </div>
 </details>
 
