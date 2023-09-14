@@ -23,7 +23,8 @@
 
 - [x] 비디오 화면에 출력
 - [x] 음소거, 카메라 on/off 버튼
-- [x] 소유한 카메라중, 화상채팅에 사용할 원하는 카메라로 변경
+- [x] 소유한 카메라 중, 화상채팅에 사용할 원하는 카메라로 변경
+- [x] 같은 wifi 환경이 아니어도 연결 가능하도록 구현
 
 <br />
 
@@ -1075,6 +1076,36 @@ function makeConnection() {
   })
   // ...
 }
+```
+
+#### 6. Data channel (peer가 많아지면 느려지는 WebRTC의 단점을 보완)
+
+```JavaScript
+// app.js
+
+let myDataChannel
+
+// peer 1(첫번째로 연결되는 컴퓨터)에서 실행
+socket.on('welcome', async () => {
+  myDataChannel = myPeerConnection.createDataChannel('chat')
+  myDataChannel.addEventListener('message', (event) => {
+    console.log(event.data)
+  })
+  console.log('made data channel')
+  // ...
+})
+
+
+// peer 2(그 다음에 연결되는 컴퓨터)에서 실행
+socket.on('offer', async (offer) => {
+  myPeerConnection.addEventListener('datachannel', (event) => {
+    myDataChannel = event.myDataChannel
+    myDataChannel.addEventListener('message', (event) => {
+      console.log(event.data)
+    })
+  })
+  // ...
+})
 ```
 
   </div>
