@@ -10,7 +10,7 @@ app.use('/public', express.static(__dirname + '/public'))
 app.get('/', (_, res) => res.render('webRTCHome'))
 
 // home만 사용할 것이기 때문에 redirect를 설정해줬다.
-app.get('/*', (_, res) => res.render('webRTCHome'))
+app.get('/*', (_, res) => res.redirect('/'))
 
 // http 서버 생성
 const httpServer = http.createServer(app)
@@ -22,12 +22,8 @@ wsServer.on('connection', (socket) => {
     socket.join(roomName)
     socket.to(roomName).emit('welcome')
   })
-  socket.on('offer', (offer, roomName) =>
-    socket.to(roomName).emit('offer', offer)
-  )
-  socket.on('answer', (answer, roomName) =>
-    socket.to(roomName).emit('answer', answer)
-  )
+  socket.on('offer', (offer, roomName) => socket.to(roomName).emit('offer', offer))
+  socket.on('answer', (answer, roomName) => socket.to(roomName).emit('answer', answer))
   socket.on('ice', (ice, roomName) => socket.to(roomName).emit('ice', ice))
 })
 
