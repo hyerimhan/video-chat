@@ -11,7 +11,7 @@ app.use('/public', express.static(__dirname + '/public'))
 app.get('/', (_, res) => res.render('socketIOHome'))
 
 // home만 사용할 것이기 때문에 redirect를 설정해줬다.
-app.get('/*', (_, res) => res.render('socketIOHome'))
+app.get('/*', (_, res) => res.redirect('/'))
 
 // http 서버 생성
 const httpServer = http.createServer(app)
