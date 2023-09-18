@@ -16,7 +16,7 @@ app.get('/*', (_, res) => res.redirect('/'))
 const server = http.createServer(app)
 // webSocket 서버 생성
 // http 서버와 ws 2개의 protocol 사용 가능. http 서버 위에 ws서버를 만들기 위함. http, ws가 같은 port에 있길 원할때 사용 (선택)
-// 이렇게 하는 이유는 위에 설정해 둔 views, static files, home, redirection을 원하기 때문.
+// 이렇게 하는 이유는 위에 설정해 둔 views, static files, home, redirection을 원하기 때문
 const wss = new WebSocket.Server({ server })
 
 // fake database
