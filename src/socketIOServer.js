@@ -60,7 +60,7 @@ wsServer.on('connection', (socket) => {
     wsServer.sockets.emit('room_change', publicRooms())
   })
 
-  // 유저가 접속을 중단할 것이지만 아직 방을 완전히 나가지는 않은 상태
+  // 유저가 접속을 중단할 것이지만 아직 방을 완전히 나가지는 않은 상태 (방에 다른 유저가 남아있는 상태)
   socket.on('disconnecting', () => {
     socket.rooms.forEach((room) =>
       // 아직 방을 완전히 나가지는 않은 상태이기 때문에 인원수에 나도 포함되어 있는 상태이기 때문에 "countRoom(room) - 1" 한다.
@@ -79,7 +79,7 @@ wsServer.on('connection', (socket) => {
     done()
   })
 
-  // 닉네임 설정
+  // app.js에서 입력한 닉네임 저장
   socket.on('nickname', (nickname) => (socket['nickname'] = nickname))
 })
 

@@ -422,7 +422,7 @@ wsServer.on('connection', (socket) => {
     socket.to(roomName.payload).emit('welcome')
   })
 
-  // 유저가 접속을 중단할 것이지만 아직 방을 완전히 나가지는 않은 상태(퇴장)
+  // 유저가 접속을 중단할 것이지만 아직 방을 완전히 나가지는 않은 상태 (방에 다른 유저가 남아있는 상태)
   socket.on('disconnecting', () =>
     socket.rooms.forEach((room) => socket.to(room).emit('bye'))
   )
@@ -517,7 +517,7 @@ wsServer.on('connection', (socket) => {
     done()
   })
 
-  // 닉네임 설정
+  // app.js에서 입력한 닉네임 저장
   socket.on('nickname', (nickname) => (socket['nickname'] = nickname))
 })
 ```
@@ -835,7 +835,6 @@ camerasSelect.addEventListener('input', handleCameraChange)
 ### 🔆 WebRTC
 
 > 참고문서: [https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API)
-
 
 <img width="100%" src="https://github.com/hyerimhan/video-chat/assets/64674174/7eaafb22-044b-4445-8e9d-ce31beb9d1a6">
 
